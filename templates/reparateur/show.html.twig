@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ reparateur.nom }} - Repair Café{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_reparateur_index') }}">Réparateurs</a></li>
+                    <li class="breadcrumb-item active">{{ reparateur.nom }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        {# Informations du réparateur #}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle"></i> {{ reparateur.nom }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-person-circle display-1 text-info"></i>
+                    </div>
+                    
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th><i class="bi bi-star"></i> Niveau</th>
+                                <td>
+                                    {% if reparateur.niveauExperience.value == 'Débutant' %}
+                                        <span class="badge bg-secondary">{{ reparateur.niveauExperience.value }}</span>
+                                    {% elseif reparateur.niveauExperience.value == 'Intermédiaire' %}
+                                        <span class="badge bg-primary">{{ reparateur.niveauExperience.value }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ reparateur.niveauExperience.value }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><i class="bi bi-envelope"></i> Email</th>
+                                <td><a href="mailto:{{ reparateur.email }}">{{ reparateur.email }}</a></td>
+                            </tr>
+                            {% if reparateur.telephone %}
+                                <tr>
+                                    <th><i class="bi bi-telephone"></i> Téléphone</th>
+                                    <td>{{ reparateur.telephone }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <th><i class="bi bi-calendar-plus"></i> Inscription</th>
+                                <td>{{ reparateur.dateInscription|date('d/m/Y') }}</td>
+                            </tr>
+                            <tr>
+                                <th><i class="bi bi-check-circle"></i> Statut</th>
+                                <td>
+                                    {% if reparateur.estActif %}
+                                        <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactif</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {% if reparateur.presentation %}
+                        <div class="alert alert-light">
+                            <strong><i class="bi bi-chat-text"></i> Présentation :</strong>
+                            <p class="mb-0 mt-2 small">{{ reparateur.presentation }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# Statistiques et réparations #}
+        <div class="col-md-8 mb-4">
+            {# Statistiques #}
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Statistiques personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center g-3">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h6>Total</h6>
+                                    <h2>{{ nombreTotal }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h6>Réparées</h6>
+                                    <h2>{{ nombreReparees }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h6>Irréparables</h6>
+                                    <h2>{{ nombreIrreparables }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h6>Taux réussite</h6>
+                                    <h2>{{ tauxReussite }}%</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if tempsMoyen > 0 %}
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="bi bi-clock"></i> <strong>Temps moyen par réparation :</strong> {{ tempsMoyen }} minutes
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Liste des réparations #}
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-tools"></i> Réparations effectuées</h5>
+                </div>
+                <div class="card-body">
+                    {% if reparateur.reparations is empty %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i> Aucune réparation effectuée pour le moment.
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Objet</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th>Temps</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reparation in reparateur.reparations %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path('app_objet_show', {id: reparation.objet.id}) }}">
+                                                    {{ reparation.objet.titre }}
+                                                </a>
+                                            </td>
+                                            <td>{{ reparation.dateDebut|date('d/m/Y') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ reparation.statut.value == 'Réparée' ? 'success' : (reparation.statut.value == 'Irréparable' ? 'danger' : 'warning') }}">
+                                                    {{ reparation.statut.value }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if reparation.tempsPasseMinutes %}
+                                                    {{ reparation.tempsPasseMinutes }} min
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <a href="{{ path('app_reparateur_index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

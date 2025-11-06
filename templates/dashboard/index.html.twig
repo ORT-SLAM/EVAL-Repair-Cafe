@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord - Repair Café{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">
+                <i class="bi bi-house-door"></i> Tableau de bord
+            </h1>
+            <p class="lead">Bienvenue sur le Repair Café</p>
+        </div>
+    </div>
+
+    {# Statistiques principales #}
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-box"></i> Objets reçus
+                    </h5>
+                    <p class="display-4">{{ nombreObjetsTotal }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-check-circle"></i> Réparés
+                    </h5>
+                    <p class="display-4">{{ nombreObjetsRepares }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-x-circle"></i> Irréparables
+                    </h5>
+                    <p class="display-4">{{ nombreObjetsIrreparables }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-people"></i> Réparateurs actifs
+                    </h5>
+                    <p class="display-4">{{ nombreReparateursActifs }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Répartition par statut #}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Répartition par statut</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for statut, nombre in statsStatuts %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ statut }}
+                                <span class="badge bg-primary rounded-pill">{{ nombre }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {# Dernières réparations #}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Dernières réparations</h5>
+                </div>
+                <div class="card-body">
+                    {% if dernieresReparations is empty %}
+                        <p class="text-muted">Aucune réparation pour le moment.</p>
+                    {% else %}
+                        <div class="list-group list-group-flush">
+                            {% for reparation in dernieresReparations %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ reparation.objet.titre }}</h6>
+                                        <small>{{ reparation.dateDebut|date('d/m/Y') }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <small>
+                                            <i class="bi bi-person"></i> {{ reparation.reparateur.nom }}
+                                        </small>
+                                    </p>
+                                    <span class="badge bg-{{ reparation.statut.value == 'Réparée' ? 'success' : (reparation.statut.value == 'Irréparable' ? 'danger' : 'warning') }}">
+                                        {{ reparation.statut.value }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Liens rapides #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Accès rapide</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{{ path('app_objet_index') }}" class="btn btn-primary">
+                            <i class="bi bi-box"></i> Voir tous les objets
+                        </a>
+                        <a href="{{ path('app_reparateur_index') }}" class="btn btn-info">
+                            <i class="bi bi-people"></i> Voir les réparateurs
+                        </a>
+                        <a href="{{ path('app_objet_create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Créer un objet (Faker)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

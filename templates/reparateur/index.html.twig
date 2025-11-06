@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des réparateurs - Repair Café{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                <i class="bi bi-people-fill"></i> Réparateurs actifs
+            </h1>
+            <p class="lead">Nos bénévoles dévoués</p>
+        </div>
+    </div>
+
+    {% if reparateurs is empty %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Aucun réparateur actif pour le moment.
+        </div>
+    {% else %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for data in reparateurs %}
+                {% set reparateur = data.reparateur %}
+                {% set nombreReparations = data.nombreReparations %}
+                
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-person-circle"></i> {{ reparateur.nom }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong><i class="bi bi-star"></i> Niveau d'expérience :</strong>
+                                <br>
+                                {% if reparateur.niveauExperience.value == 'Débutant' %}
+                                    <span class="badge bg-secondary fs-6 mt-1">{{ reparateur.niveauExperience.value }}</span>
+                                {% elseif reparateur.niveauExperience.value == 'Intermédiaire' %}
+                                    <span class="badge bg-primary fs-6 mt-1">{{ reparateur.niveauExperience.value }}</span>
+                                {% else %}
+                                    <span class="badge bg-success fs-6 mt-1">{{ reparateur.niveauExperience.value }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="card-text">
+                                <strong><i class="bi bi-envelope"></i> Email :</strong><br>
+                                <a href="mailto:{{ reparateur.email }}">{{ reparateur.email }}</a>
+                            </p>
+                            
+                            {% if reparateur.telephone %}
+                                <p class="card-text">
+                                    <strong><i class="bi bi-telephone"></i> Téléphone :</strong><br>
+                                    {{ reparateur.telephone }}
+                                </p>
+                            {% endif %}
+                            
+                            <p class="card-text">
+                                <strong><i class="bi bi-calendar-plus"></i> Membre depuis :</strong><br>
+                                {{ reparateur.dateInscription|date('d/m/Y') }}
+                            </p>
+                            
+                            <div class="alert alert-success mb-0">
+                                <strong><i class="bi bi-tools"></i> Réparations effectuées :</strong>
+                                <h3 class="mb-0 mt-2">{{ nombreReparations }}</h3>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ path('app_reparateur_show', {id: reparateur.id}) }}" class="btn btn-info text-white btn-sm w-100">
+                                <i class="bi bi-eye"></i> Voir le profil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col">
+            <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

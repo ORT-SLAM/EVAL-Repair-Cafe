@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des objets - Repair Café{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                <i class="bi bi-box-seam"></i> Liste des objets
+            </h1>
+        </div>
+        <div class="col text-end">
+            <a href="{{ path('app_objet_create') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Créer un objet
+            </a>
+        </div>
+    </div>
+
+    {# Filtres par catégorie #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-funnel"></i> Filtrer par catégorie</h5>
+            <div class="btn-group flex-wrap" role="group">
+                <a href="{{ path('app_objet_index') }}" 
+                   class="btn {{ categorieSelectionnee is null ? 'btn-primary' : 'btn-outline-primary' }}">
+                    Toutes
+                </a>
+                {% for categorie in categories %}
+                    <a href="{{ path('app_objet_index', {categorie: categorie.id}) }}" 
+                       class="btn {{ categorieSelectionnee == categorie.id ? 'btn-primary' : 'btn-outline-primary' }}">
+                        <i class="bi {{ categorie.icone }}" style="color: {{ categorie.couleur }}"></i>
+                        {{ categorie.nom }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# Liste des objets #}
+    {% if objets is empty %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Aucun objet trouvé.
+        </div>
+    {% else %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for objet in objets %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-header" style="background-color: {{ objet.categorie.couleur }}20">
+                            <h5 class="card-title mb-0">
+                                <i class="bi {{ objet.categorie.icone }}" style="color: {{ objet.categorie.couleur }}"></i>
+                                {{ objet.titre }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <strong><i class="bi bi-tag"></i> Catégorie :</strong> 
+                                <span class="badge" style="background-color: {{ objet.categorie.couleur }}">
+                                    {{ objet.categorie.nom }}
+                                </span>
+                            </p>
+                            <p class="card-text">
+                                <strong><i class="bi bi-person"></i> Propriétaire :</strong> {{ objet.nomProprietaire }}
+                            </p>
+                            <p class="card-text">
+                                <strong><i class="bi bi-calendar"></i> Déposé le :</strong> {{ objet.dateDepot }}
+                            </p>
+                            
+                            {# Statut de la dernière réparation #}
+                            {% set derniereReparation = null %}
+                            {% set maxId = 0 %}
+                            {% for reparation in objet.reparations %}
+                                {% if reparation.id > maxId %}
+                                    {% set derniereReparation = reparation %}
+                                    {% set maxId = reparation.id %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if derniereReparation %}
+                                <p class="card-text">
+                                    <strong><i class="bi bi-tools"></i> Statut :</strong>
+                                    <span class="badge bg-{{ derniereReparation.statut.value == 'Réparée' ? 'success' : (derniereReparation.statut.value == 'Irréparable' ? 'danger' : 'warning') }}">
+                                        {{ derniereReparation.statut.value }}
+                                    </span>
+                                </p>
+                            {% else %}
+                                <p class="card-text">
+                                    <strong><i class="bi bi-tools"></i> Statut :</strong>
+                                    <span class="badge bg-secondary">En attente</span>
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ path('app_objet_show', {id: objet.id}) }}" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
