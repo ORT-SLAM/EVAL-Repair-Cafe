@@ -63,4 +63,18 @@ class ReparateurRepository extends ServiceEntityRepository
         // Retourner seulement les X premiers
         return array_slice($resultat, 0, $limit);
     }
+
+    // Trouver les reparateurs spécialisés dans une catégorie donnée et actifs (sinon aucune utilité)
+    public function findSpecialistesByCategory(int $categoryId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->innerJoin('r.specialites', 'c')
+            ->where('c.id = :categoryId')
+            ->setParameter('categoryId', $categoryId)
+            ->andWhere('r.estActif = true')
+            ->orderBy('r.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 }

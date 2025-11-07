@@ -49,9 +49,16 @@ class Category
     #[ORM\OneToMany(targetEntity: Objet::class, mappedBy: 'categorie')]
     private Collection $objets;
 
+    /**
+     * @var Collection<int, Reparateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Reparateur::class, mappedBy: 'specialites')]
+    private Collection $reparateurs;
+
     public function __construct()
     {
         $this->objets = new ArrayCollection();
+        $this->reparateurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -132,6 +139,33 @@ class Category
             if ($objet->getCategorie() === $this) {
                 $objet->setCategorie(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reparateur>
+     */
+    public function getReparateurs(): Collection
+    {
+        return $this->reparateurs;
+    }
+
+    public function addReparateur(Reparateur $reparateur): static
+    {
+        if (!$this->reparateurs->contains($reparateur)) {
+            $this->reparateurs->add($reparateur);
+            $reparateur->addSpecialite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReparateur(Reparateur $reparateur): static
+    {
+        if ($this->reparateurs->removeElement($reparateur)) {
+            $reparateur->removeSpecialite($this);
         }
 
         return $this;

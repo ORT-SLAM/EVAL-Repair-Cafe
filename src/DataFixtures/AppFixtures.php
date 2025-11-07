@@ -26,7 +26,7 @@ class AppFixtures extends Fixture
     {
         // Chargement des données dans l'ordre des dépendances
         $categories = $this->loadCategories($manager);
-        $reparateurs = $this->loadReparateurs($manager);
+        $reparateurs = $this->loadReparateurs($manager, $categories);
         $objets = $this->loadObjets($manager, $categories);
         $this->loadReparations($manager, $objets, $reparateurs);
 
@@ -40,7 +40,7 @@ class AppFixtures extends Fixture
     private function loadCategories(ObjectManager $manager): array
     {
         $categories = [];
-        
+
         // Catégories prédéfinies pour un repair café
         $categoriesData = [
             [
@@ -109,16 +109,34 @@ class AppFixtures extends Fixture
 
     /**
      * Charge les réparateurs dans la base de données
+     * @param Category[] $categories
      * @return Reparateur[]
      */
-    private function loadReparateurs(ObjectManager $manager): array
+    private function loadReparateurs(ObjectManager $manager, array $categories): array
     {
+
+        $specialiteNames = [
+            'Électronique',
+            'Électroménager',
+            'Audio/Vidéo',
+            'Informatique',
+            'Textile',
+            'Mécanique',
+            'Ameublement',
+            'Jouets'
+        ];
+
+        $categoryMap = [];
+        foreach ($categories as $category) {
+            $categoryMap[$category->getNom()] = $category;
+        }
+
         $reparateurs = [];
         $niveauxExperience = NiveauExperience::cases();
 
         for ($i = 0; $i < 15; $i++) {
             $reparateur = new Reparateur();
-            
+
             // Générer un numéro au format français 06-12-34-56-78
             $telephone = $this->faker->boolean(80) ? sprintf(
                 '0%d-%02d-%02d-%02d-%02d',
@@ -128,7 +146,8 @@ class AppFixtures extends Fixture
                 $this->faker->numberBetween(0, 99),
                 $this->faker->numberBetween(0, 99)
             ) : null;
-            
+
+            // Attribuer des spécialités aléatoires (1 à 3max)
             $reparateur->setNom($this->faker->name())
                 ->setEmail($this->faker->unique()->email())
                 ->setTelephone($telephone)
@@ -136,6 +155,11 @@ class AppFixtures extends Fixture
                 ->setNiveauExperience($this->faker->randomElement($niveauxExperience))
                 ->setPresentation($this->faker->boolean(70) ? $this->faker->paragraph(3) : null)
                 ->setEstActif($this->faker->boolean(85)); // 85% de chances d'être actif
+
+            for ($j = 0; $j < $this->faker->numberBetween(1, 3); $j++) {
+                $categoryName = $this->faker->randomElement($specialiteNames);
+                $reparateur->addSpecialite($categoryMap[$categoryName]);
+            }
 
             $manager->persist($reparateur);
             $reparateurs[] = $reparateur;
@@ -152,7 +176,7 @@ class AppFixtures extends Fixture
     private function loadObjets(ObjectManager $manager, array $categories): array
     {
         $objets = [];
-        
+
         // Types d'objets réalistes pour un repair café
         $typesObjets = [
             'Machine à café',
@@ -198,7 +222,7 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 50; $i++) {
             $objet = new Objet();
             $typeObjet = $this->faker->randomElement($typesObjets);
-            
+
             $objet->setTitre($typeObjet . ' ' . $this->faker->word())
                 ->setDescriptionPanne($this->faker->randomElement($pannesTypes) . '. ' . $this->faker->sentence())
                 ->setNomProprietaire($this->faker->name())
@@ -224,7 +248,7 @@ class AppFixtures extends Fixture
     private function loadReparations(ObjectManager $manager, array $objets, array $reparateurs): void
     {
         $statuts = StatutReparation::cases();
-        
+
         $pieces = [
             'Résistance',
             'Condensateur',
@@ -246,28 +270,28 @@ class AppFixtures extends Fixture
         // Créer 1 à 3 réparations par objet (aléatoire)
         foreach ($objets as $objet) {
             $nbReparations = $this->faker->numberBetween(1, 3);
-            
+
             for ($i = 0; $i < $nbReparations; $i++) {
                 $reparation = new Reparation();
-                
+
                 $dateDebut = \DateTimeImmutable::createFromMutable(
                     $this->faker->dateTimeBetween('-2 months', 'now')
                 );
-                
+
                 // Calculer la date de fin (entre 30 min et 5 heures après le début)
                 $dureeMinutes = $this->faker->numberBetween(30, 300);
                 $dateFin = $dateDebut->modify('+' . $dureeMinutes . ' minutes');
-                
+
                 $statut = $this->faker->randomElement($statuts);
-                
+
                 // Date de fin seulement si réparée ou irréparable
                 $hasDateFin = in_array($statut, [StatutReparation::REPAREE, StatutReparation::IRREPARABLE]);
-                
+
                 $reparation->setDateDebut($dateDebut)
                     ->setDateFin($hasDateFin ? $dateFin : null)
                     ->setStatut($statut)
                     ->setCommentaire(in_array($statut, [StatutReparation::REPAREE, StatutReparation::IRREPARABLE])
-                        ? $this->faker->paragraph() 
+                        ? $this->faker->paragraph()
                         : ($this->faker->boolean(60) ? $this->faker->sentence() : null)
                     )
                     ->setTempsPasseMinutes($statut === StatutReparation::REPAREE ? $dureeMinutes : null)

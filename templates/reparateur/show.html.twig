@@ -71,6 +71,23 @@
                         </tbody>
                     </table>
 
+                    <div class="mb-3">
+                        <strong><i class="bi bi-wrench"></i> Spécialités :</strong><br>
+                        {% if reparateur.specialites is empty %}
+                            <span class="text-muted small">Aucune spécialité</span>
+                        {% else %}
+                            <div class="mt-2">
+                                {% for specialite in reparateur.specialites %}
+                                    <a href="{{ path('app_category_show', {id: specialite.id}) }}" 
+                                       class="badge fs-6 me-1 mb-1 text-decoration-none" 
+                                       style="background-color: {{ specialite.couleur }};">
+                                        {{ specialite.icone }} {{ specialite.nom }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
                     {% if reparateur.presentation %}
                         <div class="alert alert-light">
                             <strong><i class="bi bi-chat-text"></i> Présentation :</strong>
