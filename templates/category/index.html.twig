@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catégories - Repair Café{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Catégories
+            </h1>
+            <p class="lead">Tous les types d'objets que nous réparons</p>
+        </div>
+    </div>
+
+    {% if categories is empty %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Aucune catégorie pour le moment.
+        </div>
+    {% else %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for category in categories %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header text-white" style="background-color: {{ category.couleur }};">
+                            <h5 class="card-title mb-0">
+                                <span class="fs-3">{{ category.icone }}</span>
+                                {{ category.nom }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{ category.description }}</p>
+                            
+                            <div class="row text-center g-2 mt-2">
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded">
+                                        <small class="text-muted d-block">Objets</small>
+                                        <strong class="fs-5">{{ category.objets|length }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded">
+                                        <small class="text-muted d-block">Réparateurs</small>
+                                        <strong class="fs-5">{{ category.reparateurs|length }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ path('app_category_show', {id: category.id}) }}" class="btn btn-sm w-100 text-white" style="background-color: {{ category.couleur }};">
+                                <i class="bi bi-eye"></i> Voir les détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col">
+            <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

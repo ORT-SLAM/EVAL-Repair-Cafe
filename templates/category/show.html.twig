@@ -1,0 +1,213 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.nom }} - Repair Café{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_category_index') }}">Catégories</a></li>
+                    <li class="breadcrumb-item active">{{ category.nom }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {# En-tête de la catégorie #}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow-lg">
+                <div class="card-header text-white py-4" style="background-color: {{ category.couleur }};">
+                    <h1 class="display-4 mb-0">
+                        <span class="fs-1">{{ category.icone }}</span>
+                        {{ category.nom }}
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ category.description }}</p>
+
+                    <div class="row text-center g-3 mt-2">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <i class="bi bi-box-seam text-primary fs-2"></i>
+                                    <h3 class="mb-0 mt-2">{{ nombreObjets }}</h3>
+                                    <p class="text-muted mb-0">Objets enregistrés</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <i class="bi bi-box-seam text-primary fs-2"></i>
+                                    <h3 class="mb-0 mt-2">{{ objetsRepares }}</h3>
+                                    <p class="text-muted mb-0">Réparation éffectués</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <i class="bi bi-people-fill text-info fs-2"></i>
+                                    <h3 class="mb-0 mt-2">{{ reparateurs|length }}</h3>
+                                    <p class="text-muted mb-0">Réparateurs spécialisés</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Liste des réparateurs spécialisés #}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: {{ category.couleur }};">
+                    <h4 class="mb-0">
+                        <i class="bi bi-people-fill"></i> Réparateurs spécialisés
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if reparateurs is empty %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i> Aucun réparateur spécialisé dans cette catégorie pour le moment.
+                        </div>
+                    {% else %}
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                            {% for reparateur in reparateurs %}
+                                <div class="col">
+                                    <div class="card h-100 {% if not reparateur.estActif %}opacity-75{% endif %}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="bi bi-person-circle"></i> {{ reparateur.nom }}
+                                                {% if not reparateur.estActif %}
+                                                    <span class="badge bg-secondary fs-6">Inactif</span>
+                                                {% else %}
+                                                    <span class="badge bg-success fs-6">Actif</span>
+                                                {% endif %}
+                                            </h5>
+
+                                            <p class="card-text">
+                                                <small>
+                                                    <i class="bi bi-star"></i>
+                                                    {% if reparateur.niveauExperience.value == 'Débutant' %}
+                                                        <span class="badge bg-secondary">{{ reparateur.niveauExperience.value }}</span>
+                                                    {% elseif reparateur.niveauExperience.value == 'Intermédiaire' %}
+                                                        <span class="badge bg-primary">{{ reparateur.niveauExperience.value }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">{{ reparateur.niveauExperience.value }}</span>
+                                                    {% endif %}
+                                                </small>
+                                            </p>
+
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-envelope"></i> {{ reparateur.email }}
+                                                </small>
+                                            </p>
+
+                                            {% if reparateur.telephone %}
+                                                <p class="card-text">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-telephone"></i> {{ reparateur.telephone }}
+                                                    </small>
+                                                </p>
+                                            {% endif %}
+
+                                            {# Afficher toutes les spécialités du réparateur #}
+                                            {% if reparateur.specialites|length > 1 %}
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Autres spécialités:</small><br>
+                                                    {% for specialite in reparateur.specialites %}
+                                                        {% if specialite.id != category.id %}
+                                                            <span class="badge fs-6 me-1 mt-1" style="background-color: {{ specialite.couleur }};">
+                                                                {{ specialite.icone }} {{ specialite.nom }}
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-tools"></i> {{ reparateur.reparations|length }} réparations
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <a href="{{ path('app_reparateur_show', {id: reparateur.id}) }}" class="btn btn-sm btn-info text-white w-100">
+                                                <i class="bi bi-eye"></i> Voir le profil
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Liste des objets dans cette catégorie #}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: {{ category.couleur }};">
+                    <h4 class="mb-0">
+                        <i class="bi bi-box-seam"></i> Objets de cette catégorie
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if category.objets is empty %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i> Aucun objet dans cette catégorie pour le moment.
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Propriétaire</th>
+                                        <th>Date de dépôt</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for objet in category.objets %}
+                                        <tr>
+                                            <td><strong>{{ objet.titre }}</strong></td>
+                                            <td>{{ objet.nomProprietaire }}</td>
+                                            <td>{{ objet.dateDepot|date('d/m/Y') }}</td>
+                                            <td>
+                                                <a href="{{ path('app_objet_show', {id: objet.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> Voir
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <a href="{{ path('app_category_index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour aux catégories
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
